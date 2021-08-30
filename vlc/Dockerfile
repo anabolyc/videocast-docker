@@ -1,4 +1,4 @@
-FROM debian:buster-slim as build
+FROM debian:buster-slim
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -12,20 +12,21 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     /usr/sbin/update-locale LANG=en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
-RUN  apt-get install -y icecast2
+RUN  apt-get install -y vlc-bin vlc-plugin-base # vlc
 
-WORKDIR /icecast2
+RUN apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
 ADD start.sh .
-RUN chown icecast2 /icecast2 -R
+ADD vlm.conf .
+RUN useradd -ms /bin/bash vlc
+RUN chown vlc /app -R
+
+USER vlc
  
-EXPOSE 8000
+EXPOSE 5000
 
-USER icecast2
-
-ENV ICECAST_PASSWORD "f498f60c-4ca0-4506-b9ac-1b9623d3db6e"
-ENV ICECAST_ADMPASSWORD "b4c6c873-08d1-41b7-adcd-a1d7773c53fa"
-ENV ICECAST_CONFIG /etc/icecast2/icecast.xml
-ENV ICECAST_HOST localhost
-ENV ICECAST_SRC_LIMIT 10
+ENV ROOT_FOLDER "/media"
+# ENV VLC_PLUGIN_PATH /usr/lib/vlc/plugins/
 
 CMD ["/bin/bash", "./start.sh"]
