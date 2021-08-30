@@ -1,0 +1,58 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "config builder",
+            "type": "shell",
+            "group": "build",
+            "command": "docker run --privileged --rm tonistiigi/binfmt --install all ; docker buildx rm mybuilder ; docker buildx create --use --name mybuilder && docker buildx inspect --bootstrap",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker buildx & export to docker",
+            "type": "shell",
+            "command": "docker buildx build --platform linux/amd64 --load --tag $(cat tag) .",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "docker buildx",
+            "type": "shell",
+            "command": "docker buildx build --platform linux/arm/v7,linux/amd64 --tag $(cat tag) .",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker buildx & push to registry",
+            "type": "shell",
+            "command": "docker buildx build --platform linux/arm/v7,linux/amd64 -t $(cat tag) . --push",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker run",
+            "type": "shell",
+            "command": "docker run --name icecast-instance-dev --rm -ti -p 8000:8000 $(cat tag)",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker run bash",
+            "type": "shell",
+            "command": "docker run --rm -ti -p 8000:8000 --entrypoint=/bin/bash $(cat tag)",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker attach",
+            "type": "shell",
+            "command": "docker exec -ti icecast-instance-dev /bin/bash",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker push",
+            "type": "shell",
+            "command": "docker push $(cat tag)"
+        }
+    ]
+}
