@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  vlc:
+    image: "andreymalyshenko/videocast-vlc"
+    ports:
+      - "5000:5000"
+    volumes:
+      - "/mnt/cifs/media/video/movies:/media:ro"
+  xupnpd:
+    image: "andreymalyshenko/videocast-xupnpd"
+    depends_on:
+      - vlc
+    environment:
+      FRONTEND_NAME: "2X2"
+      FRONTEND_PORT: "4044"
+      BACKEND_GUID: "bcebdd31-ebb6-4773-88fb-5812b2778a6e"
+      VLC_ADDR: "vlc:5000"

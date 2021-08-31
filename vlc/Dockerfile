@@ -27,6 +27,7 @@ USER vlc
 EXPOSE 5000
 
 ENV ROOT_FOLDER "/media"
+ENV BACKEND_PASSWORD 87813686-a290-4e78-a49f-f815e60ef969
 # ENV VLC_PLUGIN_PATH /usr/lib/vlc/plugins/
 
 CMD ["/bin/bash", "./start.sh"]

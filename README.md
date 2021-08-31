@@ -20,19 +20,19 @@ Using docker buildx to target amd64 and armv7 archs. Therefore runnable on Raspb
 
 You should have vlc working now, you may test it with `docker run` task to execute vlc or `docker run bash` to run bash in target container and perhaps execute `start.sh` yourself
 
---> 
-
 ### MINIDLNA
 
-* Go to `icecast` folder 
+* Go to `xupnpd` folder 
 * Run `config builder` task first to configure docker buildx (in not done while building vlc).
-* Run `docker buildx & export to docker` task to build icecast docker image for current arch and export to docker environment.
-* (Alternatively) Run `docker buildx` task to build icecast docker image for all archs. This is currently failing to export image to docker environment due to some bug.
-* (Alternatively) Run `docker buildx & push to registry` task to build icecast docker image for all archs and push result to registry.
+* Run `docker buildx & export to docker` task to build xupnpd docker image for current arch and export to docker environment.
+* (Alternatively) Run `docker buildx` task to build xupnpd docker image for all archs. This is currently failing to export image to docker environment due to some bug.
+* (Alternatively) Run `docker buildx & push to registry` task to build xupnpd docker image for all archs and push result to registry.
 
-You should have icecast working now, you may test it with `docker run` task to execute icecast or `docker run bash` to run bash in target container and perhaps execute `start.sh` yourself. When executed you should be able to access web page at http://localhost:8000 and log on as admin using password specified in `ICECAST_ADMPASSWORD` container environment variable.
+You should have xupnpd working now, you may test it with `docker run` task to execute xupnpd or `docker run bash` to run bash in target container and perhaps execute `start.sh` yourself. When executed you should be able to access frontend at http://localhost:4044 
 
 ## How to run
+
+-->
 
 (assuming docker-compose is already installed and working correctly, see links section below)
 
@@ -43,13 +43,13 @@ To verify your setup one would run it locally in your environment using below st
 just run `docker-compose up`, you shoul be able to see similar output
 ```
 Creating network "foldercast-docker_default" with the default driver
-Creating foldercast-docker_icecast_1 ... done
+Creating foldercast-docker_xupnpd_1 ... done
 Creating foldercast-docker_vlc_1    ... done
-Attaching to foldercast-docker_icecast_1, foldercast-docker_vlc_1
-icecast_1  | [2020-05-10  11:19:51] WARN CONFIG/_parse_root Warning, <hostname> not configured, using default value "localhost". This will cause problems, e.g. with YP directory listings.
-icecast_1  | [2020-05-10  11:19:51] WARN CONFIG/_parse_root Warning, <location> not configured, using default value "Earth".
-icecast_1  | [2020-05-10  11:19:51] WARN CONFIG/_parse_root Warning, <admin> contact not configured, using default value "icemaster@localhost".
-icecast_1  | [2020-05-10  11:19:51] WARN fserve/fserve_recheck_mime_types Cannot open mime types file /etc/mime.types
+Attaching to foldercast-docker_xupnpd_1, foldercast-docker_vlc_1
+xupnpd_1  | [2020-05-10  11:19:51] WARN CONFIG/_parse_root Warning, <hostname> not configured, using default value "localhost". This will cause problems, e.g. with YP directory listings.
+xupnpd_1  | [2020-05-10  11:19:51] WARN CONFIG/_parse_root Warning, <location> not configured, using default value "Earth".
+xupnpd_1  | [2020-05-10  11:19:51] WARN CONFIG/_parse_root Warning, <admin> contact not configured, using default value "icemaster@localhost".
+xupnpd_1  | [2020-05-10  11:19:51] WARN fserve/fserve_recheck_mime_types Cannot open mime types file /etc/mime.types
 ```
 
 Now you may see status under http://localhost:8000/admin/ and listen stream under http://localhost:8000/listen
@@ -93,19 +93,19 @@ sudo systemctl enable docker-compose@foldercast
 
 ### Run as a service, no docker-compose (auto start on boot)
 
-Create icecast service using `sudo nano /etc/systemd/system/icecast-docker.service`. Place following contents there
+Create xupnpd service using `sudo nano /etc/systemd/system/xupnpd-docker.service`. Place following contents there
 ```
 [Unit]
-Description=dockerized icecast
+Description=dockerized xupnpd
 Requires=docker.service network-online.service
 After=docker.service network-online.service
 
 [Service]
-ExecStartPre=-/usr/bin/docker rm -f icecast-instance
-ExecStartPre=-/usr/bin/docker pull andreymalyshenko/icecast
-ExecStart=/usr/bin/docker run --name icecast-instance -p 8000:8000 -e ICECAST_HOST=icecast-instance andreymalyshenko/icecast
-ExecStartPost=/bin/sh -c 'while ! docker ps | grep icecast-instance ; do sleep 0.2; done'
-ExecStop=/usr/bin/docker rm -f icecast-instance
+ExecStartPre=-/usr/bin/docker rm -f xupnpd-instance
+ExecStartPre=-/usr/bin/docker pull andreymalyshenko/xupnpd
+ExecStart=/usr/bin/docker run --name xupnpd-instance -p 8000:8000 -e xupnpd_HOST=xupnpd-instance andreymalyshenko/xupnpd
+ExecStartPost=/bin/sh -c 'while ! docker ps | grep xupnpd-instance ; do sleep 0.2; done'
+ExecStop=/usr/bin/docker rm -f xupnpd-instance
 TimeoutSec=0
 RemainAfterExit=no
 Restart=always
@@ -118,13 +118,13 @@ Create vlc service using `sudo nano /etc/systemd/system/vlc-docker.service`. Pla
 ```
 [Unit]
 Description=dockerized vlc-1
-Requires=docker.service network-online.service icecast-docker.service
-After=docker.service network-online.service icecast-docker.service
+Requires=docker.service network-online.service xupnpd-docker.service
+After=docker.service network-online.service xupnpd-docker.service
 
 [Service]
 ExecStartPre=-/usr/bin/docker rm -f vlc-instance-1
 ExecStartPre=-/usr/bin/docker pull andreymalyshenko/vlc
-ExecStart=/usr/bin/docker run --name vlc-instance-1 -v '/data2/muzlo/ Radio/Fabio And Grooverider:/media:ro' -e STREAM_HOST=icecast-instance -e STREAM_PATH='/fg' -e STREAM_NAME='Fabio & Grooverider' -e STREAM_GENRE='Drum&Bass' -e STREAM_DESCRIPTION='Wall to wall drum and bass.' andreymalyshenko/vlc
+ExecStart=/usr/bin/docker run --name vlc-instance-1 -v '/data2/muzlo/ Radio/Fabio And Grooverider:/media:ro' -e STREAM_HOST=xupnpd-instance -e STREAM_PATH='/fg' -e STREAM_NAME='Fabio & Grooverider' -e STREAM_GENRE='Drum&Bass' -e STREAM_DESCRIPTION='Wall to wall drum and bass.' andreymalyshenko/vlc
 ExecStartPost=/bin/sh -c 'while ! docker ps | grep vlc-instance-1 ; do sleep 0.2; done'
 ExecStop=/usr/bin/docker rm -f vlc-instance-1
 TimeoutSec=0
@@ -141,7 +141,7 @@ Now start both servvlc by running
 sudo systemctl start vlc-docker.service
 ```
 
-You should be able to access icecast server UI under http://localhost:8000 as before and listen stream under http://localhost:8000/fg. If everything works all right, enable autostart by running
+You should be able to access xupnpd server UI under http://localhost:8000 as before and listen stream under http://localhost:8000/fg. If everything works all right, enable autostart by running
 ```
 sudo systemctl enable vlc-docker.service
 ```
