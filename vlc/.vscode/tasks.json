@@ -1,0 +1,58 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "config builder",
+            "type": "shell",
+            "group": "build",
+            "command": "docker run --privileged --rm tonistiigi/binfmt --install all ; docker buildx rm mybuilder ; docker buildx create --use --name mybuilder && docker buildx inspect --bootstrap",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker buildx & export to docker",
+            "type": "shell",
+            "command": "docker buildx build --platform linux/amd64 --load --tag $(cat tag) .",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "docker buildx",
+            "type": "shell",
+            "command": "docker buildx build --platform linux/arm/v7,linux/amd64,linux/arm64 --tag $(cat tag) .",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker buildx & push to registry",
+            "type": "shell",
+            "command": "docker buildx build --platform linux/arm/v7,linux/amd64,linux/arm64 -t $(cat tag) . --push",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker run",
+            "type": "shell",
+            "command": "docker run --name vlcnox-instance-1-dev --rm -ti -p 5000:5000 -v /mnt/cifs/media/video/movies:/media $(cat tag)",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker run bash",
+            "type": "shell",
+            "command": "docker run --rm -ti -p 5001:5000 --entrypoint=/bin/bash -v /mnt/cifs/media/video/movies:/media $(cat tag)",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker attach",
+            "type": "shell",
+            "command": "docker exec -ti vlcnox-instance-1-dev /bin/bash",
+            "problemMatcher": []
+        },
+        {
+            "label": "docker push",
+            "type": "shell",
+            "command": "docker push $(cat tag)"
+        }
+    ]
+}

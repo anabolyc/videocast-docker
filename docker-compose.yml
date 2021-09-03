@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  vlc:
+    image: "andreymalyshenko/videocast-vlc"
+    network_mode: "host"
+    # ports:
+    #   - 127.0.0.1:5000:5000
+    volumes:
+      - "/mnt-auto/cifs/video/movies:/media:ro"
+
+  xupnpd:
+    image: "andreymalyshenko/videocast-xupnpd"
+    depends_on:
+      - vlc
+    network_mode: "host"
+    # ports:
+    #   - 127.0.0.1:4044:4044
+    environment:
+      FRONTEND_NAME: "2X2_DEV"
+      FRONTEND_PORT: "4044"
+      BACKEND_GUID: "bcebdd31-ebb6-4773-88fb-5812b2778a6e"
+      VLC_ADDR: "127.0.0.1:5000"
