@@ -12,7 +12,10 @@ else
 	echo "Config file appears to be patched already"
 fi
 
-echo "#EXTINF:-1 group-title="TV" tvg-name="${FRONTEND_NAME}" tvg-id="" tvg-logo="",${FRONTEND_NAME}\nhttp://${VLC_ADDR}/live" > /app/playlists/list.m3u 
+echo "#EXTINF:-1 group-title=\"TV\" tvg-name=\"${FRONTEND_NAME}\" tvg-id=\"\" tvg-logo=\"\",${FRONTEND_NAME}" > /app/xupnpd/playlists/tv.m3u 
+echo "http://${VLC_ADDR}/live" >> /app/xupnpd/playlists/tv.m3u 
+
+cat /app/xupnpd/playlists/tv.m3u
 
 echo "Starting xupnp server.."
 /app/xupnpd/xupnpd

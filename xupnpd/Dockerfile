@@ -43,14 +43,14 @@ ENV LC_ALL en_US.UTF-8
 
 WORKDIR /app
 COPY --from=build /build/xupnpd/staging ./xupnpd
-RUN mkdir ./playlists
+RUN mkdir ./xupnpd/playlists
 ADD start.sh .
 RUN useradd -ms /bin/bash xupnpd
 RUN chown xupnpd /app -R
 
 USER xupnpd
  
-# EXPOSE 5000
+EXPOSE 4044
 
 ENV FRONTEND_NAME 2X2
 ENV FRONTEND_PORT 4044
